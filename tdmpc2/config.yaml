@@ -65,7 +65,7 @@ simnorm_dim: 8
 wandb_project: ???
 wandb_entity: ???
 wandb_silent: false
-enable_wandb: true
+enable_wandb: false
 save_csv: true
 
 # misc
