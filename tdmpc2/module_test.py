@@ -3,6 +3,9 @@ os.environ['LAZY_LEGACY_OP'] = '0'
 os.environ['TORCHDYNAMO_INLINE_INBUILT_NN_MODULES'] = "1"
 os.environ['TORCH_LOGS'] = "+recompiles"
 
+from go2_env import Go2Env, get_cfgs
+import genesis as gs
+
 import warnings
 warnings.filterwarnings('ignore')
 import torch
@@ -34,11 +37,18 @@ def train(cfg: dict):
     print("cfg.multitask",cfg.multitask)
     trainer_cls = OfflineTrainer if cfg.multitask else OnlineTrainer
 
-    #trainer = trainer_cls(
-    #    cfg=cfg,
-    #    env=make_env(cfg),
-    #    agent=TDMPC2(cfg),
-    #    buffer=Buffer(cfg),
-    #    logger=Logger(cfg),
-    #)
+    gs.init(logging_level="warning")
+    env_cfg, obs_cfg, reward_cfg, command_cfg = get_cfgs()
+    env = Go2Env(
+        num_envs=1, env_cfg=env_cfg, obs_cfg=obs_cfg, reward_cfg=reward_cfg, command_cfg=command_cfg#, show_viewer=True
+    )
+
+    trainer = trainer_cls(
+        cfg=cfg,
+        #env=make_env(cfg),
+        env=env,
+        agent=TDMPC2(cfg),
+        buffer=Buffer(cfg),
+        logger=Logger(cfg),
+    )
 train()

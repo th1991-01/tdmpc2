@@ -8,9 +8,7 @@ import torch
 def main():
 
     gs.init(logging_level="warning")
-
     env_cfg, obs_cfg, reward_cfg, command_cfg = get_cfgs()
-
     env = Go2Env(
         num_envs=1, env_cfg=env_cfg, obs_cfg=obs_cfg, reward_cfg=reward_cfg, command_cfg=command_cfg, show_viewer=True
     )
