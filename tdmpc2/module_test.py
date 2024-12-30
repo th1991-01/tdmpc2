@@ -27,21 +27,24 @@ torch.set_float32_matmul_precision('high')
 @hydra.main(config_name='config', config_path='.')
 def train(cfg: dict):
     assert torch.cuda.is_available()
-    print("cfg",cfg)
-
-    assert cfg.steps > 0, 'Must train for at least 1 step.'
-    cfg = parse_cfg(cfg)
-    set_seed(cfg.seed)
-    print(colored('Work dir:', 'yellow', attrs=['bold']), cfg.work_dir)
     
-    print("cfg.multitask",cfg.multitask)
-    trainer_cls = OfflineTrainer if cfg.multitask else OnlineTrainer
-
     gs.init(logging_level="warning")
     env_cfg, obs_cfg, reward_cfg, command_cfg = get_cfgs()
     env = Go2Env(
         num_envs=1, env_cfg=env_cfg, obs_cfg=obs_cfg, reward_cfg=reward_cfg, command_cfg=command_cfg#, show_viewer=True
     )
+
+    print("cfg",cfg)
+    assert cfg.steps > 0, 'Must train for at least 1 step.'
+    cfg = parse_cfg(cfg)
+    set_seed(cfg.seed)
+    print(colored('Work dir:', 'yellow', attrs=['bold']), cfg.work_dir)
+    cfg.obs_shape = {'state': (obs_cfg["num_obs"],)}
+    cfg.action_dim = env_cfg["num_actions"]
+    cfg.episode_length = env.max_episode_length
+
+    print("cfg.multitask",cfg.multitask)
+    trainer_cls = OfflineTrainer if cfg.multitask else OnlineTrainer
 
     trainer = trainer_cls(
         cfg=cfg,
@@ -51,4 +54,5 @@ def train(cfg: dict):
         buffer=Buffer(cfg),
         logger=Logger(cfg),
     )
+    trainer.train()
 train()
