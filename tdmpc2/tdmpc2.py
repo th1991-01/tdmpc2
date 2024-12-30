@@ -118,12 +118,14 @@ class TDMPC2(torch.nn.Module):
 		if task is not None:
 			task = torch.tensor([task], device=self.device)
 		if self.cfg.mpc:
-			return self.plan(obs, t0=t0, eval_mode=eval_mode, task=task).cpu()
+			# return self.plan(obs, t0=t0, eval_mode=eval_mode, task=task).cpu()
+			return self.plan(obs, t0=t0, eval_mode=eval_mode, task=task)
 		z = self.model.encode(obs, task)
 		action, info = self.model.pi(z, task)
 		if eval_mode:
 			action = info["mean"]
-		return action[0].cpu()
+		# return action[0].cpu()
+		return action[0]
 
 	@torch.no_grad()
 	def _estimate_value(self, z, actions, task):

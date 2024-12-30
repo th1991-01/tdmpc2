@@ -87,6 +87,7 @@ def gs_rand_float(lower, upper, shape, device):
 
 
 class Go2Env:
+    # For rsl_rl
     def __init__(self, num_envs, env_cfg, obs_cfg, reward_cfg, command_cfg, show_viewer=False, device="cuda"):
         self.device = torch.device(device)
 
@@ -336,3 +337,18 @@ class Go2Env:
     def _reward_base_height(self):
         # Penalize base height away from target
         return torch.square(self.base_pos[:, 2] - self.reward_cfg["base_height_target"])
+
+class Go2EnvTDMPC2(Go2Env):
+    # For td-mpc2
+
+    def step(self, actions):
+        base_obs_buf, _, base_rew_buf, base_reset_buf, base_extras = super().step(actions.unsqueeze(0))
+        base_extras['success'] = 0.0
+        return base_obs_buf[0], base_rew_buf[0].cpu(), base_reset_buf, base_extras
+
+    def reset(self):
+        base_ret = super().reset()
+        return base_ret[0][0]
+
+    def rand_act(self):
+        return gs_rand_float(-self.env_cfg["clip_actions"], self.env_cfg["clip_actions"], (self.env_cfg["num_actions"],), self.device)

@@ -3,7 +3,8 @@ os.environ['LAZY_LEGACY_OP'] = '0'
 os.environ['TORCHDYNAMO_INLINE_INBUILT_NN_MODULES'] = "1"
 os.environ['TORCH_LOGS'] = "+recompiles"
 
-from go2_env import Go2Env, get_cfgs
+from go2_env import Go2EnvTDMPC2 as Go2Env
+from go2_env import get_cfgs
 import genesis as gs
 
 import warnings
@@ -42,6 +43,7 @@ def train(cfg: dict):
     cfg.obs_shape = {'state': (obs_cfg["num_obs"],)}
     cfg.action_dim = env_cfg["num_actions"]
     cfg.episode_length = env.max_episode_length
+    cfg.seed_steps = max(1000, 5*cfg.episode_length)
 
     print("cfg.multitask",cfg.multitask)
     trainer_cls = OfflineTrainer if cfg.multitask else OnlineTrainer
